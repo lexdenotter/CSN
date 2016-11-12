@@ -4,6 +4,8 @@ import random
 import pygame
 import RPi.GPIO as GPIO
 import time
+import datetime
+import csv
 
 GPIO.cleanup()
 GPIO.setmode(GPIO.BCM)
@@ -20,9 +22,12 @@ GPIO.setup(buttonRechts, GPIO.IN, pull_up_down=GPIO.PUD_UP)#Knop S2
 # Variablen voor functies
 iterationsGroen = 1
 speedGroen = 1
-iterationsRood = 3
+iterationsRood = 5
 speedRood = 1
+iterationsRood1 = 1
+speedRood1 = 1
 pincode = 0000
+datum = datetime.datetime.now().strftime('%a %d %B %Y om %I:%M')
 
 # Algemene functies
 def BlinkGroen(numTimes, speed):
@@ -39,11 +44,23 @@ def BlinkRood(numTimes, speed):
         GPIO.output(4, False) ## zet GPIO pin 4 uit
         time.sleep(speed) ## Wacht
 
+def BlinkRood1(numTimes, speed):
+    for i in range(0,numTimes): ## Zet loop numTimes aan
+        GPIO.output(4, True) ## zet GPIO pin 4 aan
+        time.sleep(speed) ## Wacht
+        GPIO.output(4, False) ## zet GPIO pin 4 uit
+        time.sleep(speed) ## Wacht
+
+
 def alarmaan():
-    BlinkRood(int(iterationsRood),float(speedRood))
     pygame.mixer.init()
     pygame.mixer.music.load('alarm.mp3')
     pygame.mixer.music.play()
+    BlinkRood(int(iterationsRood),float(speedRood))
+    with open('logfile', 'a', newline='') as logbestand:
+        wr = csv.writer(logbestand, delimiter=';')
+        wr.writerow([datum])
+
 
 def knop():
     while True:
@@ -75,6 +92,7 @@ def scherm1():
                 scherm2()
             else:
                 Label(root,text='Helaas fout, probeer opnieuw!', bg='#ddffcc').pack()
+                BlinkRood(int(iterationsRood1),float(speedRood1))
         except:
             None
 
@@ -102,7 +120,6 @@ def scherm1():
     okbutton.pack()
 
     # Functie aanroepen en variable vaststellen
-
     countdown(10)
 
     # Einde en sluiten
@@ -149,17 +166,17 @@ def scherm2():
     nieuwepincodebutton = Button(root2, text='Nieuwe pincode!', command=nieuwepincode, fg='#000000', bg='#cce6ff')
     terugbutton = Button(root2, text='Ik wil terug!', command=terug, fg='white', bg='#ff3333')
     alarmuit = Button(root2, text='Alarm Uit', fg='white', command=alarmuit, bg='#ff3333')
-    alarmaan = Button(root2, text='Alarm Aanzetten',fg='white', command=alarmaan, bg='#ff3333')
+    alarmaan = Button(root2, text='Alarm \n Aanzetten',fg='white', command=alarmaan, bg='#ff3333')
 
     # Buttons positioneren
     nieuwepincodebutton.config(height=2, width=20)
     nieuwepincodebutton.pack()
     terugbutton.config(height=2, width=10)
     terugbutton.place(x=200,y=0)
-    alarmaan.config(height=2, width=10)
-    alarmaan.place(x=400, y=100)
-    alarmuit.config(height=2, width=10)
-    alarmuit.place(x=300, y=100)
+    alarmaan.config(height=4, width=14, font=('Arial', 15))
+    alarmaan.place(x=350, y=150)
+    alarmuit.config(height=4, width=10, font=('Arial', 15))
+    alarmuit.place(x=200, y=150)
 
      # Einde en sluiten
     root2.mainloop()
@@ -188,6 +205,7 @@ def scherm3():
                 scherm2()
             else:
                 Label(root3,text='Helaas fout, probeer opnieuw!', bg='#ddffcc').pack()
+                BlinkRood(int(iterationsRood1),float(speedRood1))
         except:
             None
 
